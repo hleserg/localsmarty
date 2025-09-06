@@ -1,12 +1,14 @@
 import logging
 from telegram import Update
-from telegram.ext import CallbackContext
+from telegram.ext import ContextTypes
+from telegram.constants import ParseMode
+from utils.markdown import escape_markdown_v2
 from services.yandex_client import get_gpt_response
 from config import config
 
 logger = logging.getLogger(__name__)
 
-def start(update: Update, context: CallbackContext) -> None:
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handler for /start command"""
     welcome_message = (
         "🤖 Привет! Я бот с интеграцией YandexGPT.\n\n"
@@ -15,9 +17,10 @@ def start(update: Update, context: CallbackContext) -> None:
         f"Голосовые сообщения: {'поддерживаются' if config.ENABLE_VOICE else 'не поддерживаются'}\n\n"
         "Используйте /help для получения списка команд."
     )
-    update.message.reply_text(welcome_message)
+    if update.message:
+        await update.message.reply_text(escape_markdown_v2(welcome_message), parse_mode=ParseMode.MARKDOWN_V2)
 
-def help_command(update: Update, context: CallbackContext) -> None:
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handler for /help command"""
     help_text = (
         "📋 *Доступные команды:*\n\n"
@@ -34,34 +37,42 @@ def help_command(update: Update, context: CallbackContext) -> None:
     if config.ENABLE_CONTEXT:
         help_text += "\n🧠 *Контекст:*\nЯ помню предыдущие сообщения в рамках нашего диалога."
     
-    update.message.reply_text(help_text, parse_mode='Markdown')
+    if update.message:
+        await update.message.reply_text(escape_markdown_v2(help_text), parse_mode=ParseMode.MARKDOWN_V2)
 
-def ping_command(update: Update, context: CallbackContext) -> None:
+async def ping_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handler for /ping command - bot health check"""
     ping_message = (
         "🏓 Pong!\n"
         f"Бот работает нормально.\n"
         f"Версия: 1.0.0\n"
-        f"YandexGPT: {'✅ настроен' if config.YC_FOLDER_ID and (config.YC_API_KEY or config.YC_IAM_TOKEN) else '❌ не настроен'}\n"
+        f"YandexGPT: {'✅ настроен' if config.YC_FOLDER_ID and (config.YC_API_KEY or config.YC_IAM_TOKEN or config.YC_SA_KEY_FILE or config.YC_SA_KEY_JSON) else '❌ не настроен'}\n"
         f"Голосовые функции: {'✅ включены' if config.ENABLE_VOICE else '❌ отключены'}"
     )
-    update.message.reply_text(ping_message)
+    if update.message:
+        await update.message.reply_text(escape_markdown_v2(ping_message), parse_mode=ParseMode.MARKDOWN_V2)
 
-def handle_text_message(update: Update, context: CallbackContext) -> None:
+async def handle_text_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handler for regular text messages"""
-    user_message = update.message.text
-    chat_id = update.effective_chat.id
+    if not update.message:
+        return
+    user_message = update.message.text or ""
+    chat_id = update.effective_chat.id if update.effective_chat else 0
     
     logger.info(f"Received text message from chat {chat_id}: {user_message[:50]}...")
     
     try:
         # Get response from YandexGPT
         gpt_response = get_gpt_response(user_message, chat_id)
-        update.message.reply_text(gpt_response)
+        await update.message.reply_text(
+            escape_markdown_v2(gpt_response),
+            parse_mode=ParseMode.MARKDOWN_V2,
+        )
         logger.info(f"Sent response to chat {chat_id}")
         
     except Exception as e:
         logger.error(f"Error handling text message for chat {chat_id}: {str(e)}")
-        update.message.reply_text(
-            "Извините, произошла ошибка при обработке вашего сообщения. Попробуйте позже."
+        await update.message.reply_text(
+            escape_markdown_v2("Извините, произошла ошибка при обработке вашего сообщения. Попробуйте позже."),
+            parse_mode=ParseMode.MARKDOWN_V2,
         )

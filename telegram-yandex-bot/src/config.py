@@ -7,8 +7,11 @@ class Config:
     
     # Yandex Cloud Configuration
     YC_FOLDER_ID: Optional[str] = os.getenv("YC_FOLDER_ID")
-    YC_API_KEY: Optional[str] = os.getenv("YC_API_KEY")
-    YC_IAM_TOKEN: Optional[str] = os.getenv("YC_IAM_TOKEN")
+    YC_API_KEY: Optional[str] = os.getenv("YC_API_KEY")  # optional; prefer IAM via SA key
+    YC_IAM_TOKEN: Optional[str] = os.getenv("YC_IAM_TOKEN")  # optional fallback/manual
+    # Service Account key for automatic IAM token retrieval
+    YC_SA_KEY_FILE: Optional[str] = os.getenv("YC_SA_KEY_FILE")
+    YC_SA_KEY_JSON: Optional[str] = os.getenv("YC_SA_KEY_JSON")
     
     # Model Configuration
     YC_MODEL_URI: Optional[str] = os.getenv("YC_MODEL_URI")
@@ -25,10 +28,12 @@ class Config:
     TTS_VOICE: str = os.getenv("TTS_VOICE", "alena")
     TTS_FORMAT: str = os.getenv("TTS_FORMAT", "oggopus")
     AUDIO_MAX_DURATION_SEC: int = int(os.getenv("AUDIO_MAX_DURATION_SEC", "60"))
+    ENABLE_TTS_REPLY: bool = os.getenv("ENABLE_TTS_REPLY", "false").lower() == "true"
     
     # API Endpoints
-    YC_FOUNDATION_MODELS_ENDPOINT = "https://llm.api.cloud.yandex.net/foundationModels/v1/chat/completion"
+    YC_FOUNDATION_MODELS_ENDPOINT = "https://llm.api.cloud.yandex.net/foundationModels/v1/completion"
     YC_STT_ENDPOINT = "https://stt.api.cloud.yandex.net/speech/v1/stt:recognize"
     YC_TTS_ENDPOINT = "https://tts.api.cloud.yandex.net/speech/v1/tts:synthesize"
+    YC_IAM_ENDPOINT = "https://iam.api.cloud.yandex.net/iam/v1/tokens"
 
 config = Config()

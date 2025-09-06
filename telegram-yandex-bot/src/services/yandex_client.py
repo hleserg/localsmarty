@@ -2,6 +2,7 @@ import requests
 import logging
 from typing import List, Dict, Optional
 from config import config
+from .iam_token_manager import token_manager
 
 logger = logging.getLogger(__name__)
 
@@ -13,6 +14,17 @@ class YandexClient:
         self.model_uri = config.YC_MODEL_URI or f"gpt://{self.folder_id}/yandexgpt/latest"
         self.endpoint = config.YC_FOUNDATION_MODELS_ENDPOINT
         
+        # HTTP session with retries
+        self.session = requests.Session()
+        try:
+            from requests.adapters import HTTPAdapter
+            from urllib3.util import Retry
+            retries = Retry(total=3, backoff_factor=0.5, status_forcelist=[429, 500, 502, 503, 504])
+            self.session.mount("https://", HTTPAdapter(max_retries=retries))
+        except Exception:
+            # Fallback: no retries if urllib3 not available
+            pass
+
         # Chat context storage (in-memory for MVP)
         self.chat_contexts: Dict[int, List[Dict[str, str]]] = {}
         
@@ -23,12 +35,18 @@ class YandexClient:
             "x-folder-id": self.folder_id
         }
         
-        if self.api_key:
-            headers["Authorization"] = f"Api-Key {self.api_key}"
-        elif self.iam_token:
+        # Prefer static creds when present (tests and simple setups), otherwise auto IAM via SA key
+        if self.iam_token:
             headers["Authorization"] = f"Bearer {self.iam_token}"
+        elif self.api_key:
+            headers["Authorization"] = f"Api-Key {self.api_key}"
         else:
-            raise ValueError("Either YC_API_KEY or YC_IAM_TOKEN must be provided")
+            # Use automatic IAM only if SA key configured
+            if config.YC_SA_KEY_FILE or config.YC_SA_KEY_JSON:
+                iam = token_manager.get_token()
+                headers["Authorization"] = f"Bearer {iam}"
+            else:
+                raise ValueError("Credentials missing: set YC_SA_KEY_FILE/YC_SA_KEY_JSON or YC_IAM_TOKEN/YC_API_KEY")
             
         return headers
     

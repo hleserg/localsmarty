@@ -1,0 +1,13 @@
+version: "3.9"
+
+services:
+  bot:
+    build: .
+    image: telegram-yandex-bot:latest
+    container_name: telegram-yandex-bot
+    env_file:
+      - .env
+    volumes:
+      - ./authorized_key.json:/app/authorized_key.json:ro
+      - ./logs:/app/logs
+    restart: unless-stopped

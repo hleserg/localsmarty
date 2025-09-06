@@ -28,8 +28,8 @@ def main() -> None:
         logger.error("YC_FOLDER_ID is not set")
         return
     
-    if not config.YC_API_KEY and not config.YC_IAM_TOKEN:
-        logger.error("Either YC_API_KEY or YC_IAM_TOKEN must be set")
+    if not (config.YC_SA_KEY_FILE or config.YC_SA_KEY_JSON or config.YC_IAM_TOKEN or config.YC_API_KEY):
+        logger.error("Credentials missing: set YC_SA_KEY_FILE or YC_SA_KEY_JSON (preferred), or YC_IAM_TOKEN / YC_API_KEY")
         return
     
     logger.info("Starting Telegram bot with YandexGPT integration")

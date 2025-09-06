@@ -2,6 +2,7 @@ import requests
 import logging
 from typing import Optional
 from config import config
+from .iam_token_manager import token_manager
 
 logger = logging.getLogger(__name__)
 
@@ -12,6 +13,15 @@ class SpeechClient:
         self.folder_id = config.YC_FOLDER_ID
         self.stt_endpoint = config.YC_STT_ENDPOINT
         self.tts_endpoint = config.YC_TTS_ENDPOINT
+        # HTTP session with retries
+        self.session = requests.Session()
+        try:
+            from requests.adapters import HTTPAdapter
+            from urllib3.util import Retry
+            retries = Retry(total=3, backoff_factor=0.5, status_forcelist=[429, 500, 502, 503, 504])
+            self.session.mount("https://", HTTPAdapter(max_retries=retries))
+        except Exception:
+            pass
         
     def _get_auth_header(self) -> str:
         """Get authentication header value"""
@@ -30,9 +40,17 @@ class SpeechClient:
         try:
             language = language or config.STT_LANGUAGE
             
-            headers = {
-                "Authorization": self._get_auth_header()
-            }
+            # Prefer static creds; auto IAM only if SA key configured
+            if self.iam_token:
+                auth_header = f"Bearer {self.iam_token}"
+            elif self.api_key:
+                auth_header = f"Api-Key {self.api_key}"
+            elif config.YC_SA_KEY_FILE or config.YC_SA_KEY_JSON:
+                iam = token_manager.get_token()
+                auth_header = f"Bearer {iam}"
+            else:
+                auth_header = self._get_auth_header()
+            headers = {"Authorization": auth_header}
             
             params = {
                 "folderId": self.folder_id,
@@ -81,10 +99,17 @@ class SpeechClient:
                 else:
                     language = "en-US"
             
-            headers = {
-                "Authorization": self._get_auth_header(),
-                "Content-Type": "application/x-www-form-urlencoded"
-            }
+            # Prefer static creds; auto IAM only if SA key configured
+            if self.iam_token:
+                auth_header = f"Bearer {self.iam_token}"
+            elif self.api_key:
+                auth_header = f"Api-Key {self.api_key}"
+            elif config.YC_SA_KEY_FILE or config.YC_SA_KEY_JSON:
+                iam = token_manager.get_token()
+                auth_header = f"Bearer {iam}"
+            else:
+                auth_header = self._get_auth_header()
+            headers = {"Authorization": auth_header, "Content-Type": "application/x-www-form-urlencoded"}
             
             data = {
                 "text": text,
