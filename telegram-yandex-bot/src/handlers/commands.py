@@ -2,11 +2,28 @@ import logging
 from telegram import Update
 from telegram.ext import ContextTypes
 from telegram.constants import ParseMode
-from utils.markdown import escape_markdown_v2
+from utils.markdown import transform_to_markdown_v2
 from services.yandex_client import get_gpt_response
 from config import config
+from telegram.error import BadRequest
 
 logger = logging.getLogger(__name__)
+
+
+async def _reply_md_v2_safe(update: Update, text: str, disable_preview: bool = True) -> None:
+    """Reply with MarkdownV2; on BadRequest fallback to plain text."""
+    if not update.message:
+        return
+    try:
+        await update.message.reply_text(
+            transform_to_markdown_v2(text),
+            parse_mode=ParseMode.MARKDOWN_V2,
+            disable_web_page_preview=disable_preview,
+        )
+    except BadRequest as e:
+        # Fallback to plain text if MarkdownV2 fails
+        logging.getLogger(__name__).warning(f"MarkdownV2 failed, fallback to plain: {e}")
+        await update.message.reply_text(text, disable_web_page_preview=disable_preview)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handler for /start command"""
@@ -18,7 +35,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "Используйте /help для получения списка команд."
     )
     if update.message:
-        await update.message.reply_text(escape_markdown_v2(welcome_message), parse_mode=ParseMode.MARKDOWN_V2)
+        await _reply_md_v2_safe(update, welcome_message)
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handler for /help command"""
@@ -38,7 +55,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         help_text += "\n🧠 *Контекст:*\nЯ помню предыдущие сообщения в рамках нашего диалога."
     
     if update.message:
-        await update.message.reply_text(escape_markdown_v2(help_text), parse_mode=ParseMode.MARKDOWN_V2)
+        await _reply_md_v2_safe(update, help_text)
 
 async def ping_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handler for /ping command - bot health check"""
@@ -50,7 +67,7 @@ async def ping_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         f"Голосовые функции: {'✅ включены' if config.ENABLE_VOICE else '❌ отключены'}"
     )
     if update.message:
-        await update.message.reply_text(escape_markdown_v2(ping_message), parse_mode=ParseMode.MARKDOWN_V2)
+        await _reply_md_v2_safe(update, ping_message)
 
 async def handle_text_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handler for regular text messages"""
@@ -58,21 +75,14 @@ async def handle_text_message(update: Update, context: ContextTypes.DEFAULT_TYPE
         return
     user_message = update.message.text or ""
     chat_id = update.effective_chat.id if update.effective_chat else 0
-    
+
     logger.info(f"Received text message from chat {chat_id}: {user_message[:50]}...")
-    
+
     try:
         # Get response from YandexGPT
         gpt_response = get_gpt_response(user_message, chat_id)
-        await update.message.reply_text(
-            escape_markdown_v2(gpt_response),
-            parse_mode=ParseMode.MARKDOWN_V2,
-        )
+        await _reply_md_v2_safe(update, gpt_response)
         logger.info(f"Sent response to chat {chat_id}")
-        
     except Exception as e:
         logger.error(f"Error handling text message for chat {chat_id}: {str(e)}")
-        await update.message.reply_text(
-            escape_markdown_v2("Извините, произошла ошибка при обработке вашего сообщения. Попробуйте позже."),
-            parse_mode=ParseMode.MARKDOWN_V2,
-        )
+        await _reply_md_v2_safe(update, "Извините, произошла ошибка при обработке вашего сообщения. Попробуйте позже.")
