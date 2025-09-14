@@ -7,6 +7,8 @@ services:
     container_name: telegram-yandex-bot
     env_file:
       - .env
+    environment:
+      - OWNER_USER_ID=152423085
     volumes:
       - ./authorized_key.json:/app/authorized_key.json:ro
       - ./logs:/app/logs

@@ -202,6 +202,11 @@ async def handle_text_message(update: Update, context: ContextTypes.DEFAULT_TYPE
     )
 
     try:
+        # Проверяем, не является ли отправитель владельцем бота
+        if config.OWNER_USER_ID and user_id == config.OWNER_USER_ID:
+            logger.info(f"Ignoring message from owner (user_id: {user_id})")
+            return
+        
         # Отправляем статус "печатает"
         logger.info(f"Processing text message from chat {chat_id}: {user_message[:50]}...")
         await _send_typing_status(update, context)
@@ -255,6 +260,11 @@ async def handle_business_message(update: Update, context: ContextTypes.DEFAULT_
     )
 
     try:
+        # Проверяем, не является ли отправитель владельцем бота
+        if config.OWNER_USER_ID and user_id == config.OWNER_USER_ID:
+            logger.info(f"Ignoring business message from owner (user_id: {user_id})")
+            return
+        
         # Отправляем статус "печатает"
         logger.info(f"Processing business message from chat {chat_id}: {user_message[:50]}...")
         await _send_business_typing_status(update, context)

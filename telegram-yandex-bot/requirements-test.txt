@@ -1,0 +1,18 @@
+# Тестовые зависимости для Telegram бота
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+pytest-mock>=3.10.0
+pytest-cov>=4.0.0
+pytest-xdist>=3.0.0
+
+# Дополнительные зависимости для тестов
+requests-mock>=1.10.0
+freezegun>=1.2.0
+responses>=0.23.0
+
+# Зависимости для тестов производительности
+psutil>=5.9.0
+
+# Зависимости для тестов с моками
+unittest-mock>=1.0.0
+
