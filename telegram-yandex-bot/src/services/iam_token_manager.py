@@ -1,10 +1,11 @@
 import json
 import time
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from typing import Optional
 
 import requests
+import pytz
 
 from config import config
 
@@ -98,7 +99,7 @@ class IamTokenManager:
             raise RuntimeError("Invalid IAM token response: missing fields")
 
         # expiresAt example: '2025-09-06T14:00:00.123456Z'
-        expires_at = datetime.fromisoformat(expires_at_str.replace("Z", "+00:00")).astimezone(timezone.utc)
+        expires_at = datetime.fromisoformat(expires_at_str.replace("Z", "+00:00")).astimezone(pytz.UTC)
 
         self._iam_token = iam_token
         self._expires_at = expires_at
@@ -107,7 +108,7 @@ class IamTokenManager:
     def get_token(self) -> str:
         """Return a valid IAM token, refreshing it if needed."""
         # Refresh if token missing or expiring within 5 minutes
-        now = datetime.now(timezone.utc)
+        now = datetime.now(pytz.UTC)
         if not self._iam_token or not self._expires_at or (self._expires_at - now) < timedelta(minutes=5):
             self._request_iam_token()
         return self._iam_token

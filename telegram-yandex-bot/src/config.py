@@ -5,7 +5,12 @@ class Config:
     # Telegram Configuration
     TELEGRAM_TOKEN: Optional[str] = os.getenv("TELEGRAM_TOKEN")
     
-    # Yandex Cloud Configuration
+    # NeuroAPI Configuration
+    NEUROAPI_API_KEY: Optional[str] = os.getenv("NEUROAPI_API_KEY")
+    NEUROAPI_TEMPERATURE: float = float(os.getenv("NEUROAPI_TEMPERATURE", "0.7"))
+    NEUROAPI_MAX_TOKENS: int = int(os.getenv("NEUROAPI_MAX_TOKENS", "1000"))
+    
+    # Yandex Cloud Configuration (legacy, kept for compatibility)
     YC_FOLDER_ID: Optional[str] = os.getenv("YC_FOLDER_ID")
     YC_API_KEY: Optional[str] = os.getenv("YC_API_KEY")  # optional; prefer IAM via SA key
     YC_IAM_TOKEN: Optional[str] = os.getenv("YC_IAM_TOKEN")  # optional fallback/manual
@@ -13,7 +18,7 @@ class Config:
     YC_SA_KEY_FILE: Optional[str] = os.getenv("YC_SA_KEY_FILE")
     YC_SA_KEY_JSON: Optional[str] = os.getenv("YC_SA_KEY_JSON")
     
-    # Model Configuration
+    # Model Configuration (legacy)
     YC_MODEL_URI: Optional[str] = os.getenv("YC_MODEL_URI")
     YC_TEMPERATURE: float = float(os.getenv("YC_TEMPERATURE", "0.3"))
     YC_MAX_TOKENS: int = int(os.getenv("YC_MAX_TOKENS", "800"))
@@ -21,6 +26,16 @@ class Config:
     # Bot Configuration
     ENABLE_CONTEXT: bool = os.getenv("ENABLE_CONTEXT", "true").lower() == "true"
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
+    
+    # Webhook Configuration
+    WEBHOOK_URL: Optional[str] = os.getenv("WEBHOOK_URL", "https://talkbot.skhlebnikov.ru")
+    WEBHOOK_PORT: int = int(os.getenv("WEBHOOK_PORT", "11844"))
+    WEBHOOK_HOST: str = os.getenv("WEBHOOK_HOST", "0.0.0.0")
+    WEBHOOK_PATH: str = os.getenv("WEBHOOK_PATH", "/bot")
+    # SSL сертификаты не нужны - обрабатываются Hestia
+    SSL_CERT_PATH: Optional[str] = None
+    SSL_KEY_PATH: Optional[str] = None
+    WEBHOOK_SECRET_TOKEN: Optional[str] = os.getenv("WEBHOOK_SECRET_TOKEN")
     
     # Voice Configuration
     ENABLE_VOICE: bool = os.getenv("ENABLE_VOICE", "false").lower() == "true"

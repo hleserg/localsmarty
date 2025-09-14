@@ -1,0 +1,18 @@
+{
+  "update_id": 123,
+  "business_message": {
+    "business_connection_id": "test123",
+    "text": "test message",
+    "chat": {
+      "id": 123,
+      "type": "private"
+    },
+    "from": {
+      "id": 123,
+      "first_name": "Test",
+      "is_bot": false
+    },
+    "message_id": 1,
+    "date": 1234567890
+  }
+}

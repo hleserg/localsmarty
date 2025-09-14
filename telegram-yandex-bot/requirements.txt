@@ -1,5 +1,7 @@
-python-telegram-bot==20.7
+python-telegram-bot==21.9
 requests==2.31.0
 pydantic==2.5.0
 python-dotenv==1.0.0
 PyJWT[crypto]==2.8.0
+pytz==2025.2
+aiohttp==3.9.1

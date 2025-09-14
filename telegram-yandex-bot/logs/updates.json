@@ -1,0 +1,327 @@
+2025-09-14 04:38:10,993 - utils.logger - INFO - 🧪 Тест логирования полного JSON входящих updates
+2025-09-14 04:38:10,994 - utils.logger - INFO - 📝 Все updates будут записаны в logs/updates.json
+2025-09-14 04:38:10,994 - utils.logger - INFO - 💬 Имитация реальных Telegram updates
+2025-09-14 04:38:10,995 - updates - INFO - 
+================================================================================
+{
+  "timestamp": "2025-09-14 04:38:10",
+  "update": {
+    "update_id": 123456789,
+    "message": {
+      "message_id": 1,
+      "from": {
+        "id": 987654321,
+        "is_bot": false,
+        "first_name": "Иван",
+        "last_name": "Петров",
+        "username": "ivan_petrov",
+        "language_code": "ru"
+      },
+      "chat": {
+        "id": 123456789,
+        "first_name": "Иван",
+        "last_name": "Петров",
+        "username": "ivan_petrov",
+        "type": "private"
+      },
+      "date": 1694567890,
+      "text": "/start"
+    }
+  }
+}
+================================================================================
+2025-09-14 04:38:10,995 - utils.logger - INFO - [2025-09-14 04:38:10] UPDATE_ID:123456789 - Full JSON logged to updates.json
+2025-09-14 04:38:11,512 - updates - INFO - 
+================================================================================
+{
+  "timestamp": "2025-09-14 04:38:11",
+  "update": {
+    "update_id": 123456790,
+    "message": {
+      "message_id": 2,
+      "from": {
+        "id": 987654321,
+        "is_bot": false,
+        "first_name": "Иван",
+        "last_name": "Петров",
+        "username": "ivan_petrov",
+        "language_code": "ru"
+      },
+      "chat": {
+        "id": 123456789,
+        "first_name": "Иван",
+        "last_name": "Петров",
+        "username": "ivan_petrov",
+        "type": "private"
+      },
+      "date": 1694567895,
+      "text": "Привет! Расскажи мне про GPT-5"
+    }
+  }
+}
+================================================================================
+2025-09-14 04:38:11,513 - utils.logger - INFO - [2025-09-14 04:38:11] UPDATE_ID:123456790 - Full JSON logged to updates.json
+2025-09-14 04:38:12,019 - updates - INFO - 
+================================================================================
+{
+  "timestamp": "2025-09-14 04:38:12",
+  "update": {
+    "update_id": 123456791,
+    "message": {
+      "message_id": 3,
+      "from": {
+        "id": 555666777,
+        "is_bot": false,
+        "first_name": "Анна",
+        "last_name": "Сидорова",
+        "username": "anna_sidorova",
+        "language_code": "ru"
+      },
+      "chat": {
+        "id": 555666777,
+        "first_name": "Анна",
+        "last_name": "Сидорова",
+        "username": "anna_sidorova",
+        "type": "private"
+      },
+      "date": 1694567900,
+      "text": "В чём смысл жизни?"
+    }
+  }
+}
+================================================================================
+2025-09-14 04:38:12,020 - utils.logger - INFO - [2025-09-14 04:38:12] UPDATE_ID:123456791 - Full JSON logged to updates.json
+2025-09-14 04:38:12,531 - updates - INFO - 
+================================================================================
+{
+  "timestamp": "2025-09-14 04:38:12",
+  "update": {
+    "update_id": 123456792,
+    "message": {
+      "message_id": 4,
+      "from": {
+        "id": 888999000,
+        "is_bot": false,
+        "first_name": "Техник",
+        "last_name": "Разработчик",
+        "username": "tech_dev",
+        "language_code": "ru"
+      },
+      "chat": {
+        "id": 888999000,
+        "first_name": "Техник",
+        "last_name": "Разработчик",
+        "username": "tech_dev",
+        "type": "private"
+      },
+      "date": 1694567905,
+      "voice": {
+        "duration": 4,
+        "mime_type": "audio/ogg",
+        "file_id": "BAADBAADrwADBREAAYag8VYhAQABAg",
+        "file_unique_id": "AgADBREAAYag8VY",
+        "file_size": 12345
+      }
+    }
+  }
+}
+================================================================================
+2025-09-14 04:38:12,531 - utils.logger - INFO - [2025-09-14 04:38:12] UPDATE_ID:123456792 - Full JSON logged to updates.json
+2025-09-14 04:38:13,039 - updates - INFO - 
+================================================================================
+{
+  "timestamp": "2025-09-14 04:38:13",
+  "update": {
+    "update_id": 123456793,
+    "message": {
+      "message_id": 5,
+      "from": {
+        "id": 111222333,
+        "is_bot": false,
+        "first_name": "Группа",
+        "last_name": "Тест",
+        "username": "test_group",
+        "language_code": "ru"
+      },
+      "chat": {
+        "id": -1001234567890,
+        "title": "Тестовая группа",
+        "type": "group",
+        "all_members_are_administrators": true
+      },
+      "date": 1694567910,
+      "text": "Сообщение в группе"
+    }
+  }
+}
+================================================================================
+2025-09-14 04:38:13,039 - utils.logger - INFO - [2025-09-14 04:38:13] UPDATE_ID:123456793 - Full JSON logged to updates.json
+2025-09-14 04:38:13,547 - updates - INFO - 
+================================================================================
+{
+  "timestamp": "2025-09-14 04:38:13",
+  "update": {
+    "update_id": 123456794,
+    "callback_query": {
+      "id": "1234567890123456789",
+      "from": {
+        "id": 987654321,
+        "is_bot": false,
+        "first_name": "Иван",
+        "last_name": "Петров",
+        "username": "ivan_petrov",
+        "language_code": "ru"
+      },
+      "message": {
+        "message_id": 6,
+        "from": {
+          "id": 8001242722,
+          "is_bot": true,
+          "first_name": "Test Bot",
+          "username": "test_bot"
+        },
+        "chat": {
+          "id": 123456789,
+          "first_name": "Иван",
+          "last_name": "Петров",
+          "username": "ivan_petrov",
+          "type": "private"
+        },
+        "date": 1694567915,
+        "text": "Выберите действие:",
+        "reply_markup": {
+          "inline_keyboard": [
+            [
+              {
+                "text": "Кнопка 1",
+                "callback_data": "button_1"
+              },
+              {
+                "text": "Кнопка 2",
+                "callback_data": "button_2"
+              }
+            ]
+          ]
+        }
+      },
+      "chat_instance": "1234567890123456789",
+      "data": "button_1"
+    }
+  }
+}
+================================================================================
+2025-09-14 04:38:13,548 - utils.logger - INFO - [2025-09-14 04:38:13] UPDATE_ID:123456794 - Full JSON logged to updates.json
+2025-09-14 04:42:13,723 - utils.logger - INFO - 🚀 Запуск теста консольного логирования
+2025-09-14 04:42:13,723 - utils.logger - INFO - 📝 Все события будут выведены в консоль с эмодзи
+2025-09-14 04:42:13,724 - utils.logger - INFO - 💬 Имитация реальных событий бота
+2025-09-14 04:42:13,724 - utils.logger - INFO - Бот запущен и готов к работе
+2025-09-14 04:42:14,234 - updates - INFO - 
+================================================================================
+{
+  "timestamp": "2025-09-14 04:42:14",
+  "update": {
+    "update_id": 123456789,
+    "message": {
+      "message_id": 1,
+      "from": {
+        "id": 987654321,
+        "is_bot": false,
+        "first_name": "Иван",
+        "last_name": "Петров",
+        "username": "ivan_petrov",
+        "language_code": "ru"
+      },
+      "chat": {
+        "id": 123456789,
+        "first_name": "Иван",
+        "last_name": "Петров",
+        "username": "ivan_petrov",
+        "type": "private"
+      },
+      "date": 1694567890,
+      "text": "/start"
+    }
+  }
+}
+================================================================================
+2025-09-14 04:42:14,236 - utils.logger - INFO - 📨 UPDATE_ID:123456789 TYPE:TEXT USER:@ivan_petrov CONTENT:/start
+2025-09-14 04:42:14,742 - utils.logger - INFO - [2025-09-14 04:42:14] CHAT:123456789 USER:987654321 (@ivan_petrov) TYPE:COMMAND ID:1 CONTENT:/start
+2025-09-14 04:42:14,742 - messages - INFO - [2025-09-14 04:42:14] CHAT:123456789 USER:987654321 (@ivan_petrov) TYPE:COMMAND ID:1 CONTENT:/start
+2025-09-14 04:42:15,256 - utils.logger - INFO - [2025-09-14 04:42:15] CHAT:123456789 RESPONSE:TEXT STATUS:SUCCESS
+2025-09-14 04:42:15,766 - updates - INFO - 
+================================================================================
+{
+  "timestamp": "2025-09-14 04:42:15",
+  "update": {
+    "update_id": 123456790,
+    "message": {
+      "message_id": 2,
+      "from": {
+        "id": 987654321,
+        "is_bot": false,
+        "first_name": "Иван",
+        "last_name": "Петров",
+        "username": "ivan_petrov",
+        "language_code": "ru"
+      },
+      "chat": {
+        "id": 123456789,
+        "first_name": "Иван",
+        "last_name": "Петров",
+        "username": "ivan_petrov",
+        "type": "private"
+      },
+      "date": 1694567895,
+      "text": "Привет! Расскажи мне про GPT-5"
+    }
+  }
+}
+================================================================================
+2025-09-14 04:42:15,768 - utils.logger - INFO - 📨 UPDATE_ID:123456790 TYPE:TEXT USER:@ivan_petrov CONTENT:Привет! Расскажи мне про GPT-5
+2025-09-14 04:42:16,273 - utils.logger - INFO - [2025-09-14 04:42:16] CHAT:123456789 USER:987654321 (@ivan_petrov) TYPE:TEXT ID:2 CONTENT:Привет! Расскажи мне про GPT-5
+2025-09-14 04:42:16,273 - messages - INFO - [2025-09-14 04:42:16] CHAT:123456789 USER:987654321 (@ivan_petrov) TYPE:TEXT ID:2 CONTENT:Привет! Расскажи мне про GPT-5
+2025-09-14 04:42:16,783 - utils.logger - INFO - [2025-09-14 04:42:16] CHAT:123456789 RESPONSE:TEXT STATUS:SUCCESS
+2025-09-14 04:42:17,296 - updates - INFO - 
+================================================================================
+{
+  "timestamp": "2025-09-14 04:42:17",
+  "update": {
+    "update_id": 123456791,
+    "message": {
+      "message_id": 3,
+      "from": {
+        "id": 555666777,
+        "is_bot": false,
+        "first_name": "Анна",
+        "last_name": "Сидорова",
+        "username": "anna_sidorova",
+        "language_code": "ru"
+      },
+      "chat": {
+        "id": 555666777,
+        "first_name": "Анна",
+        "last_name": "Сидорова",
+        "username": "anna_sidorova",
+        "type": "private"
+      },
+      "date": 1694567900,
+      "voice": {
+        "duration": 4,
+        "mime_type": "audio/ogg",
+        "file_id": "BAADBAADrwADBREAAYag8VYhAQABAg",
+        "file_unique_id": "AgADBREAAYag8VY",
+        "file_size": 12345
+      }
+    }
+  }
+}
+================================================================================
+2025-09-14 04:42:17,297 - utils.logger - INFO - 📨 UPDATE_ID:123456791 TYPE:VOICE USER:@anna_sidorova
+2025-09-14 04:42:17,803 - utils.logger - INFO - [2025-09-14 04:42:17] CHAT:555666777 USER:555666777 (@anna_sidorova) TYPE:VOICE ID:3 CONTENT:Voice message, duration: 4s, file_id: voice_001
+2025-09-14 04:42:17,803 - messages - INFO - [2025-09-14 04:42:17] CHAT:555666777 USER:555666777 (@anna_sidorova) TYPE:VOICE ID:3 CONTENT:Voice message, duration: 4s, file_id: voice_001
+2025-09-14 04:42:18,315 - utils.logger - INFO - [2025-09-14 04:42:18] CHAT:555666777 RESPONSE:TEXT STATUS:SUCCESS
+2025-09-14 04:42:18,823 - utils.logger - ERROR - Тестовая ошибка для демонстрации
+2025-09-14 05:47:49,881 - utils.logger - INFO - 🌐 Демо webhook сервера запущено!
+2025-09-14 05:47:49,882 - utils.logger - INFO - 📡 Имитация входящих webhook запросов
+2025-09-14 05:47:49,882 - utils.logger - INFO - 💬 Симуляция различных типов updates
+2025-09-14 06:06:20,085 - utils.logger - ERROR - TELEGRAM_TOKEN is not set
