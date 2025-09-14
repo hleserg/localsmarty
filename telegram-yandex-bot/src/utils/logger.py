@@ -16,21 +16,27 @@ logging.basicConfig(
     handlers=[
         logging.FileHandler(os.path.join(log_dir, "error.log"), mode='a', encoding='utf-8'),
         logging.FileHandler(os.path.join(log_dir, "combined.log"), mode='a', encoding='utf-8'),
-        logging.FileHandler(os.path.join(log_dir, "messages.log"), mode='a', encoding='utf-8'),
-        logging.FileHandler(os.path.join(log_dir, "updates.json"), mode='a', encoding='utf-8'),
         logging.StreamHandler()  # Вывод в консоль
     ]
 )
 
-# Настройка консольного вывода для лучшей читаемости
-console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.INFO)
-console_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-console_handler.setFormatter(console_formatter)
+# Настройка отдельных логгеров для сообщений и JSON updates
+messages_handler = logging.FileHandler(os.path.join(log_dir, "messages.log"), mode='a', encoding='utf-8')
+messages_handler.setFormatter(logging.Formatter('%(asctime)s - %(message)s'))
 
-# Добавляем консольный обработчик к корневому логгеру
-root_logger = logging.getLogger()
-root_logger.addHandler(console_handler)
+updates_handler = logging.FileHandler(os.path.join(log_dir, "updates.json"), mode='a', encoding='utf-8')
+updates_handler.setFormatter(logging.Formatter('%(message)s'))
+
+# Создаем специальные логгеры
+message_logger = logging.getLogger("messages")
+message_logger.addHandler(messages_handler)
+message_logger.setLevel(logging.INFO)
+message_logger.propagate = False
+
+update_logger = logging.getLogger("updates")
+update_logger.addHandler(updates_handler)
+update_logger.setLevel(logging.INFO)
+update_logger.propagate = False
 
 logger = logging.getLogger(__name__)
 
@@ -59,8 +65,7 @@ def log_message(chat_id: int, user_id: int, username: Optional[str], message_typ
     # Выводим краткую информацию в консоль
     print(f"🔄 {console_entry}")
     
-    # Создаем отдельный логгер для сообщений
-    message_logger = logging.getLogger("messages")
+    # Логируем в файл сообщений
     message_logger.info(log_entry)
 
 def log_response(chat_id: int, response_type: str, success: bool, error_msg: Optional[str] = None):
@@ -97,7 +102,6 @@ def log_update_json(update_data: Dict[str, Any]):
     json_str = json.dumps(log_entry, ensure_ascii=False, indent=2)
     
     # Логируем в отдельный файл для JSON updates
-    update_logger = logging.getLogger("updates")
     update_logger.info(f"\n{'='*80}\n{json_str}\n{'='*80}")
     
     # Логируем краткую информацию в консоль

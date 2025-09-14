@@ -16,7 +16,7 @@ async def handle_voice_message(update: Update, context: ContextTypes.DEFAULT_TYP
     """Handler for voice messages"""
     if not config.ENABLE_VOICE:
         if update.message and update.effective_chat and update.effective_user:
-            await _reply_md_v2_safe(update, "Голосовые сообщения отключены. Пожалуйста, отправьте текстовое сообщение.")
+            await _reply_md_v2_safe(update, context, "Голосовые сообщения отключены. Пожалуйста, отправьте текстовое сообщение.")
             log_response(update.effective_chat.id, "TEXT", True)
         return
 
@@ -41,7 +41,7 @@ async def handle_voice_message(update: Update, context: ContextTypes.DEFAULT_TYP
 
     # Check duration limit
     if voice.duration > config.AUDIO_MAX_DURATION_SEC:
-        await _reply_md_v2_safe(update, f"Голосовое сообщение слишком длинное (макс. {config.AUDIO_MAX_DURATION_SEC} сек). Пожалуйста, отправьте более короткое сообщение.")
+        await _reply_md_v2_safe(update, context, f"Голосовое сообщение слишком длинное (макс. {config.AUDIO_MAX_DURATION_SEC} сек). Пожалуйста, отправьте более короткое сообщение.")
         log_response(chat_id, "TEXT", True)
         return
 
@@ -55,19 +55,19 @@ async def handle_voice_message(update: Update, context: ContextTypes.DEFAULT_TYP
         logger.info(f"Downloaded voice file, size: {len(audio_data)} bytes")
 
         # Convert speech to text
-        await _reply_md_v2_safe(update, "🎤 Обрабатываю голосовое сообщение...")
+        await _reply_md_v2_safe(update, context, "🎤 Обрабатываю голосовое сообщение...")
         log_response(chat_id, "TEXT", True)
 
         recognized_text = speech_client.speech_to_text(audio_data)
         if not recognized_text:
-            await _reply_md_v2_safe(update, "Не удалось распознать речь. Попробуйте еще раз или отправьте текстовое сообщение.")
+            await _reply_md_v2_safe(update, context, "Не удалось распознать речь. Попробуйте еще раз или отправьте текстовое сообщение.")
             log_response(chat_id, "TEXT", True)
             return
 
         logger.info(f"Recognized text: {recognized_text[:100]}...")
 
         # Show recognized text to user
-        await _reply_md_v2_safe(update, f"🗣️ Распознано: {recognized_text}")
+        await _reply_md_v2_safe(update, context, f"🗣️ Распознано: {recognized_text}")
         log_response(chat_id, "TEXT", True)
 
         # Отправляем статус "печатает" перед получением ответа от GPT
@@ -80,7 +80,7 @@ async def handle_voice_message(update: Update, context: ContextTypes.DEFAULT_TYP
         gpt_response = get_gpt_response(recognized_text, chat_id)
 
         # Send text response
-        await _reply_md_v2_safe(update, f"🤖 {gpt_response}")
+        await _reply_md_v2_safe(update, context, f"🤖 {gpt_response}")
         log_response(chat_id, "TEXT", True)
 
         # Optionally send voice response (TTS)
@@ -99,13 +99,13 @@ async def handle_voice_message(update: Update, context: ContextTypes.DEFAULT_TYP
         logger.error(f"Error processing voice message for chat {chat_id}: {str(e)}")
         log_response(chat_id, "TEXT", False, str(e))
         if update.message:
-            await _reply_md_v2_safe(update, "Произошла ошибка при обработке голосового сообщения. Попробуйте еще раз или отправьте текст.")
+            await _reply_md_v2_safe(update, context, "Произошла ошибка при обработке голосового сообщения. Попробуйте еще раз или отправьте текст.")
 
 async def handle_audio_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handler for audio messages (similar to voice but for audio files)"""
     if not config.ENABLE_VOICE:
         if update.message:
-            await _reply_md_v2_safe(update, "Аудиосообщения отключены. Пожалуйста, отправьте текстовое сообщение.")
+            await _reply_md_v2_safe(update, context, "Аудиосообщения отключены. Пожалуйста, отправьте текстовое сообщение.")
         return
     
     # For simplicity, redirect audio to voice handler
