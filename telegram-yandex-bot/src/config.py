@@ -8,7 +8,7 @@ class Config:
     # NeuroAPI Configuration
     NEUROAPI_API_KEY: Optional[str] = os.getenv("NEUROAPI_API_KEY")
     NEUROAPI_TEMPERATURE: float = float(os.getenv("NEUROAPI_TEMPERATURE", "0.7"))
-    NEUROAPI_MAX_TOKENS: int = int(os.getenv("NEUROAPI_MAX_TOKENS", "1000"))
+    NEUROAPI_MAX_TOKENS: int = int(os.getenv("NEUROAPI_MAX_TOKENS", "5000"))
     
     # Yandex Cloud Configuration (legacy, kept for compatibility)
     YC_FOLDER_ID: Optional[str] = os.getenv("YC_FOLDER_ID")

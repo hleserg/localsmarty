@@ -22,5 +22,5 @@ RUN mkdir -p /app/logs /app/ssl
 # Определяем команду для запуска бота
 WORKDIR /app/src
 
-# По умолчанию запускаем webhook сервер
-CMD ["python", "webhook_server.py"]
+# По умолчанию запускаем бота
+CMD ["python", "bot.py"]

@@ -14,6 +14,9 @@ from aiohttp import web
 # Load environment variables
 load_dotenv()
 
+# Глобальная переменная для application
+application = None
+
 async def log_all_updates(update: Update, context):
     """Middleware для логирования всех входящих updates в виде JSON"""
     try:
@@ -34,6 +37,11 @@ async def webhook_handler(request):
         
         # Создаем Update объект
         update = Update.de_json(data, None)
+        
+        # Проверяем, что application инициализирован
+        if application is None:
+            log_error("Application not initialized")
+            return web.Response(text="Application not initialized", status=500)
         
         # Обрабатываем update через стандартную систему
         await application.process_update(update)
@@ -141,33 +149,37 @@ def main() -> None:
         application.add_handler(MessageHandler(filters.AUDIO, handle_audio_message))
         log_info("Voice message handlers registered")
     
-    # Инициализируем приложение
-    async def start_server():
-        # Настраиваем webhook
-        await setup_webhook()
-        
-        # Создаем aiohttp приложение
-        app = await init_app()
-        
-        # Запускаем сервер
-        runner = web.AppRunner(app)
-        await runner.setup()
-        site = web.TCPSite(runner, config.WEBHOOK_HOST, config.WEBHOOK_PORT)
-        await site.start()
-        
-        log_info(f"Webhook server started on {config.WEBHOOK_HOST}:{config.WEBHOOK_PORT}")
-        log_info(f"Webhook URL: {config.WEBHOOK_URL}{config.WEBHOOK_PATH}")
-        
-        # Ждем завершения
-        try:
-            await asyncio.Future()  # Бесконечное ожидание
-        except KeyboardInterrupt:
-            log_info("Shutting down...")
-            await application.bot.delete_webhook()
-            await runner.cleanup()
-    
     # Запускаем сервер
     asyncio.run(start_server())
+
+async def start_server():
+    """Запуск webhook сервера"""
+    # Инициализируем application
+    await application.initialize()
+    
+    # Настраиваем webhook
+    await setup_webhook()
+    
+    # Создаем aiohttp приложение
+    app = await init_app()
+    
+    # Запускаем сервер
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, config.WEBHOOK_HOST, config.WEBHOOK_PORT)
+    await site.start()
+    
+    log_info(f"Webhook server started on {config.WEBHOOK_HOST}:{config.WEBHOOK_PORT}")
+    log_info(f"Webhook URL: {config.WEBHOOK_URL}{config.WEBHOOK_PATH}")
+    
+    # Ждем завершения
+    try:
+        await asyncio.Future()  # Бесконечное ожидание
+    except KeyboardInterrupt:
+        log_info("Shutting down...")
+        await application.bot.delete_webhook()
+        await application.shutdown()
+        await runner.cleanup()
 
 if __name__ == '__main__':
     main()

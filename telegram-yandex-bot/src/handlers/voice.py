@@ -3,6 +3,7 @@ import io
 from telegram import Update
 from io import BytesIO
 from telegram.ext import ContextTypes
+from telegram.constants import ChatAction
 from services.neuroapi_client import get_gpt_response
 from handlers.commands import _reply_md_v2_safe
 from services.speech_client import speech_client
@@ -68,6 +69,12 @@ async def handle_voice_message(update: Update, context: ContextTypes.DEFAULT_TYP
         # Show recognized text to user
         await _reply_md_v2_safe(update, f"🗣️ Распознано: {recognized_text}")
         log_response(chat_id, "TEXT", True)
+
+        # Отправляем статус "печатает" перед получением ответа от GPT
+        try:
+            await context.bot.send_chat_action(chat_id=update.effective_chat.id, action=ChatAction.TYPING)
+        except Exception as e:
+            logger.warning(f"Failed to send typing status for voice: {e}")
 
         # Get GPT response
         gpt_response = get_gpt_response(recognized_text, chat_id)

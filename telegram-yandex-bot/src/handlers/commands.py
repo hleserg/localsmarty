@@ -1,7 +1,8 @@
 import logging
+import asyncio
 from telegram import Update
 from telegram.ext import ContextTypes
-from telegram.constants import ParseMode
+from telegram.constants import ParseMode, ChatAction
 from utils.markdown import transform_to_markdown_v2
 from services.neuroapi_client import get_gpt_response
 from config import config
@@ -11,35 +12,73 @@ from utils.logger import log_message, log_response
 logger = logging.getLogger(__name__)
 
 
-async def _reply_md_v2_safe(update: Update, text: str, disable_preview: bool = True) -> None:
-    """Reply with MarkdownV2; on BadRequest fallback to plain text."""
-    if not update.message:
+async def _send_typing_status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Отправляет статус 'печатает' для обычных сообщений"""
+    if not update.message or not update.effective_chat:
+        logger.warning("Cannot send typing status: missing message or chat")
         return
     try:
-        await update.message.reply_text(
-            transform_to_markdown_v2(text),
+        logger.info(f"Sending typing status to chat {update.effective_chat.id}")
+        await context.bot.send_chat_action(chat_id=update.effective_chat.id, action=ChatAction.TYPING)
+        logger.info(f"Typing status sent successfully to chat {update.effective_chat.id}")
+    except Exception as e:
+        logger.error(f"Failed to send typing status: {e}")
+
+
+async def _send_business_typing_status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Отправляет статус 'печатает' для бизнес-сообщений"""
+    if not update.business_message or not update.effective_chat:
+        logger.warning("Cannot send business typing status: missing business_message or chat")
+        return
+    try:
+        logger.info(f"Sending business typing status to chat {update.effective_chat.id}")
+        await context.bot.send_chat_action(chat_id=update.effective_chat.id, action=ChatAction.TYPING)
+        logger.info(f"Business typing status sent successfully to chat {update.effective_chat.id}")
+    except Exception as e:
+        logger.error(f"Failed to send business typing status: {e}")
+
+
+async def _reply_md_v2_safe(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str, disable_preview: bool = True) -> None:
+    """Reply with MarkdownV2; on BadRequest fallback to plain text."""
+    if not update.message or not update.effective_chat:
+        return
+    try:
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text=transform_to_markdown_v2(text),
             parse_mode=ParseMode.MARKDOWN_V2,
             disable_web_page_preview=disable_preview,
         )
     except BadRequest as e:
         # Fallback to plain text if MarkdownV2 fails
         logging.getLogger(__name__).warning(f"MarkdownV2 failed, fallback to plain: {e}")
-        await update.message.reply_text(text, disable_web_page_preview=disable_preview)
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text=text,
+            disable_web_page_preview=disable_preview,
+        )
 
-async def _reply_business_md_v2_safe(update: Update, text: str, disable_preview: bool = True) -> None:
+async def _reply_business_md_v2_safe(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str, disable_preview: bool = True) -> None:
     """Reply to business message with MarkdownV2; on BadRequest fallback to plain text."""
-    if not update.business_message:
+    if not update.business_message or not update.effective_chat:
         return
     try:
-        await update.business_message.reply_text(
-            transform_to_markdown_v2(text),
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text=transform_to_markdown_v2(text),
             parse_mode=ParseMode.MARKDOWN_V2,
             disable_web_page_preview=disable_preview,
+            business_connection_id=update.business_message.business_connection_id
         )
     except BadRequest as e:
         # Fallback to plain text if MarkdownV2 fails
         logging.getLogger(__name__).warning(f"MarkdownV2 failed for business message, fallback to plain: {e}")
-        await update.business_message.reply_text(text, disable_web_page_preview=disable_preview)
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text=text,
+            disable_web_page_preview=disable_preview,
+            business_connection_id=update.business_message.business_connection_id
+        )
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handler for /start command"""
@@ -163,14 +202,24 @@ async def handle_text_message(update: Update, context: ContextTypes.DEFAULT_TYPE
     )
 
     try:
+        # Отправляем статус "печатает"
+        logger.info(f"Processing text message from chat {chat_id}: {user_message[:50]}...")
+        await _send_typing_status(update, context)
+        
         # Get response from NeuroAPI GPT-5
         gpt_response = get_gpt_response(user_message, chat_id)
-        await _reply_md_v2_safe(update, gpt_response)
+        await _reply_md_v2_safe(update, context, gpt_response)
         log_response(chat_id, "TEXT", True)
     except Exception as e:
         logger.error(f"Error handling text message for chat {chat_id}: {str(e)}")
         log_response(chat_id, "TEXT", False, str(e))
-        await _reply_md_v2_safe(update, "Извините, произошла ошибка при обработке вашего сообщения. Попробуйте позже.")
+        try:
+            await context.bot.send_message(
+                chat_id=chat_id,
+                text="Извините, произошла ошибка при обработке вашего сообщения. Попробуйте позже."
+            )
+        except Exception as reply_error:
+            logger.error(f"Error sending error reply: {reply_error}")
 
 async def handle_business_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handler for business messages"""
@@ -206,11 +255,15 @@ async def handle_business_message(update: Update, context: ContextTypes.DEFAULT_
     )
 
     try:
-        # Get response from NeuroAPI GPT-5 with business context
-        gpt_response = get_gpt_response(user_message, chat_id, is_business_message=True)
+        # Отправляем статус "печатает"
+        logger.info(f"Processing business message from chat {chat_id}: {user_message[:50]}...")
+        await _send_business_typing_status(update, context)
+        
+        # Get response from NeuroAPI GPT-5 with business context and connection ID
+        gpt_response = get_gpt_response(user_message, chat_id, is_business_message=True, business_connection_id=business_connection_id)
         
         # Отправляем ответ в бизнес-чат с поддержкой MarkdownV2
-        await _reply_business_md_v2_safe(update, gpt_response)
+        await _reply_business_md_v2_safe(update, context, gpt_response)
         
         log_response(chat_id, "BUSINESS_MESSAGE", True)
     except Exception as e:
@@ -218,6 +271,6 @@ async def handle_business_message(update: Update, context: ContextTypes.DEFAULT_
         log_response(chat_id, "BUSINESS_MESSAGE", False, str(e))
         
         try:
-            await _reply_business_md_v2_safe(update, "Привет! Я ИИ-ассистент Сергея. Произошла ошибка, но Сергей прочитает ваше сообщение и ответит как только сможет.")
+            await _reply_business_md_v2_safe(update, context, "Привет! Я ИИ-ассистент Сергея. Произошла ошибка, но Сергей прочитает ваше сообщение и ответит как только сможет.")
         except Exception as reply_error:
             logger.error(f"Error sending error reply for business message: {reply_error}")
