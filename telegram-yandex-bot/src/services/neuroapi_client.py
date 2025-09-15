@@ -26,7 +26,13 @@ class NeuroAPIClient:
 
         # Chat context storage (in-memory + file persistence)
         self.chat_contexts: Dict[str, List[Dict[str, str]]] = {}
-        self.context_file = "/app/logs/chat_contexts.json"
+        
+        # Ensure logs directory exists
+        log_dir = "logs"
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
+            
+        self.context_file = os.path.join(log_dir, "chat_contexts.json")
         self._load_contexts()
     
     def _load_contexts(self):
@@ -181,7 +187,7 @@ class NeuroAPIClient:
                     self.endpoint, 
                     headers=headers, 
                     json=payload,
-                    timeout=60  # Увеличиваем таймаут до 60 секунд
+                    timeout=30  # Оптимальный таймаут для webhook сервера
                 )
                 
                 if response.status_code == 200:

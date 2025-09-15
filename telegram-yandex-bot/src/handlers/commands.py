@@ -104,7 +104,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     )
     
     try:
-        await _reply_md_v2_safe(update, welcome_message)
+        await _reply_md_v2_safe(update, context, welcome_message)
         log_response(update.effective_chat.id, "TEXT", True)
     except Exception as e:
         log_response(update.effective_chat.id, "TEXT", False, str(e))
@@ -140,7 +140,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         help_text += "\n🧠 *Контекст:*\nЯ помню предыдущие сообщения в рамках нашего диалога."
     
     try:
-        await _reply_md_v2_safe(update, help_text)
+        await _reply_md_v2_safe(update, context, help_text)
         log_response(update.effective_chat.id, "TEXT", True)
     except Exception as e:
         log_response(update.effective_chat.id, "TEXT", False, str(e))
@@ -169,7 +169,7 @@ async def ping_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     )
     
     try:
-        await _reply_md_v2_safe(update, ping_message)
+        await _reply_md_v2_safe(update, context, ping_message)
         log_response(update.effective_chat.id, "TEXT", True)
     except Exception as e:
         log_response(update.effective_chat.id, "TEXT", False, str(e))
